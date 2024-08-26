@@ -1,2 +1,2 @@
-# template1
-my template with a webpack config and a few plugins
+# battleship
+a project made to practice using jest and test driven development.
