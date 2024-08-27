@@ -1,6 +1,7 @@
 {
   "name": "battleship",
   "version": "1.0.0",
+  "type": "module",
   "description": "a project made to practice using jest and test driven development.",
   "main": "index.js",
   "scripts": {

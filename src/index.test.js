@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import ship from "./ship";
+import { coordinatesCalculator } from "./gameBoard";
 
 describe("ship objects can", () => {
   test("take hits and sink", () => {
@@ -17,4 +18,11 @@ describe("ship objects can", () => {
     }
     expect(cruiser.sunk).toBe(false);
   });
+});
+
+describe("gameboard can", () => {
+  // test('place ships',()=>{
+  // })
+  // test("receive attacks",()=>{
+  // })
 });
