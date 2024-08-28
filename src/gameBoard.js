@@ -15,28 +15,31 @@ function coordinatesCalculator(head, length, direction) {
   switch (direction) {
     case "left":
       if (head[1] - length >= 0) {
-        for (let i = 0; i <= length; i++) {
+        for (let i = 0; i < length; i++) {
           coordinates.push([head[0], head[1] - i]);
         }
       }
       break;
+
     case "right":
       if (head[1] + length <= 9) {
-        for (let i = 0; i <= length; i++) {
+        for (let i = 0; i < length; i++) {
           coordinates.push([head[0], head[1] + i]);
         }
       }
       break;
+
     case "up":
       if (head[0] - length >= 0) {
-        for (let i = 0; i <= length; i++) {
+        for (let i = 0; i < length; i++) {
           coordinates.push([head[0] - i, head[1]]);
         }
       }
       break;
+
     case "down":
       if (head[0] + length <= 9) {
-        for (let i = 0; i <= length; i++) {
+        for (let i = 0; i < length; i++) {
           coordinates.push([head[0] + i, head[1]]);
         }
       }
@@ -64,61 +67,76 @@ function gameBoard() {
   let destroyer = ship(2);
   let noOfShips = 5;
 
+  const shipPlacer = (head, ship, direction) => {
+    let coordinates = coordinatesCalculator(head, ship.length, direction);
+
+    if (!coordinates) {
+      throw new Error ("Invalid placement: Out of bounds.");
+    }
+    for (let coordinate of coordinates) {
+      if (board[coordinate[0]][coordinate[1]].ship) {
+        throw new Error ("Invalid placement: Overlapping ships.");
+      }
+    }
+
+    for (let coordinate of coordinates) {
+      board[coordinate[0]][coordinate[1]].ship = true;
+      board[coordinate[0]][coordinate[1]].shipObj = ship;
+    }
+
+    noOfShips--;
+  };
+
   const placeShip = (shipType, head, direction) => {
     if (noOfShips <= 0) {
       return "out of ships";
     }
     switch (shipType) {
-      case "carrier": {
-        let coordinates = coordinatesCalculator(head, 5, direction);
-        for (let coordinate of coordinates) {
-          board[coordinate[0]][coordinate[1]].ship = true;
-          board[coordinate[0]][coordinate[1]].shipObj = carrier;
-          noOfShips--;
-        }
+      case "carrier":
+        shipPlacer(head, carrier, direction);
         break;
-      }
-      case "battleship":{
-        let coordinates = coordinatesCalculator(head, 4, direction);
-        for (let coordinate of coordinates) {
-          board[coordinate[0]][coordinate[1]].ship = true;
-          board[coordinate[0]][coordinate[1]].shipObj = battleship;
-          noOfShips--;
-        }
-        break;
-      }
-      case "cruiser":{
-        let coordinates = coordinatesCalculator(head, 3, direction);
-        for (let coordinate of coordinates) {
-          board[coordinate[0]][coordinate[1]].ship = true;
-          board[coordinate[0]][coordinate[1]].shipObj = cruiser;
-          noOfShips--;
-        }
-        break;
-      }
 
-      case "submarine":{
-        let coordinates = coordinatesCalculator(head, 3, direction);
-        for (let coordinate of coordinates) {
-          board[coordinate[0]][coordinate[1]].ship = true;
-          board[coordinate[0]][coordinate[1]].shipObj = submarine;
-          noOfShips--;
-        }
+      case "battleship":
+        shipPlacer(head, battleship, direction);
         break;
-      }
-      case "destroyer":{
-        let coordinates = coordinatesCalculator(head, 2, direction);
-        for (let coordinate of coordinates) {
-          board[coordinate[0]][coordinate[1]].ship = true;
-          board[coordinate[0]][coordinate[1]].shipObj = submarine;
-          noOfShips--;
-        }
+
+      case "cruiser":
+        shipPlacer(head, cruiser, direction);
         break;
-      }
+
+      case "submarine":
+        shipPlacer(head, submarine, direction);
+        break;
+
+      case "destroyer":
+        shipPlacer(head, destroyer, direction);
+        break;
 
       default:
-        break;
+        throw new Error ("invalid ship name");
     }
+  };
+
+  let sunkCounter = 0;
+
+  const receiveAttack = (coordinate) => {
+    let cell = board[coordinate[0]][coordinate[1]];
+
+    if (!cell.missed && !cell.hit) {
+      if (!cell.ship) {
+        cell.missed = true;
+      } else {
+        cell.hit = true;
+        cell.shipObj.hit();
+        if (cell.shipObj.sunk) {
+          sunkCounter++;
+        }
+      }
+    }
+  };
+
+  const lose = () => {
+    return sunkCounter >= 5;
   };
 
   return {
@@ -126,13 +144,9 @@ function gameBoard() {
       return board;
     },
     placeShip,
+    receiveAttack,
+    lose,
   };
 }
 
-let player1Board = gameBoard();
-
-player1Board.placeShip("carrier", [0, 1], "right");
-
-console.log(player1Board.board);
-
-export { gameBoard };
+export default gameBoard;

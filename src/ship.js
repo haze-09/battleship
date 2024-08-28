@@ -19,5 +19,8 @@ export default function ship(length) {
     get sunk() {
       return sunk;
     },
+    get length(){
+      return length;
+    }
   };
 }
