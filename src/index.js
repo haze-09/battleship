@@ -1,5 +1,4 @@
 import "./style.css";
+import { homePage } from "./dom.js";
 
-import meow from "./ship.js";
-
-meow();
+homePage();
