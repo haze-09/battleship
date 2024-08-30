@@ -57,6 +57,12 @@ body {
   grid-template-rows: repeat(10, 1fr);
 }
 
+#left{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 div[data-location="00"] {
   border-top-left-radius: 22px;
 }
@@ -86,4 +92,8 @@ div[data-location="99"] {
 }
 .ship:hover{
     background-color: #00abbe;
+}
+
+.highlight{
+  background-color: #00abbe4d;
 }

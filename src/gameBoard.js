@@ -149,4 +149,4 @@ function gameBoard() {
   };
 }
 
-export default gameBoard;
+export {gameBoard,coordinatesCalculator};

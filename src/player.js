@@ -1,4 +1,4 @@
-import gameBoard from "./gameBoard.js";
+import {gameBoard} from "./gameBoard.js";
 
 function player(type,){
     let board = gameBoard();
