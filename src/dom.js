@@ -32,7 +32,6 @@ function appendShips(ships) {
     const shipElement = document.createElement("p");
     shipElement.classList.add("ship");
     shipElement.id = ship.name;
-    shipElement.setAttribute("draggable", "true");
     shipElement.dataset.length = ship.length;
     shipElement.textContent = ship.name;
     ships.appendChild(shipElement);
@@ -49,29 +48,57 @@ const dragnDrop = (function () {
   const enable = () => {
     ships = document.querySelectorAll(".ship");
     cells = document.querySelectorAll(".cell");
+
     ships.forEach((ship) => {
+      ship.setAttribute("draggable", "true");
       ship.addEventListener("dragstart", (e) => {
         console.log("hi");
         e.dataTransfer.setData("name", ship.id);
         currentShip = ship;
         currentLength = ship.dataset.length;
         e.dataTransfer.effectAllowed = "move";
+        ship.style.opacity = "0";
+
+        const img = new Image();
+        img.src =
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+        e.dataTransfer.setDragImage(img, 0, 0);
+      });
+
+      ship.addEventListener("dragend", () => {
+        currentShip.style.opacity = "1";
       });
     });
 
     cells.forEach((cell) => {
+      cell.addEventListener("dragenter", (e) => {
+        clearHighlight();
+      });
+
       cell.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
-        let head = e.target.dataset.location;
 
-        directions(h);
-        highlightCells(validCoordinates[0].coordinates);
+        let head = e.target.dataset.location.split("").map(Number);
+        let length = parseInt(currentLength);
+        directions(head, length);
+        placeCells(validCoordinates[0].coordinates, "highlight");
       });
 
       cell.addEventListener("drop", (e) => {
         e.preventDefault();
+        ships.forEach((ship) => ship.setAttribute("draggable", "false"));
+        let buttonDiv = document.querySelector("#confirm");
+        buttonDiv.classList.remove("invisible");
+        let head = e.target.dataset.location.split("").map(Number);
         let type = e.dataTransfer.getData("name");
+
+        let confirm = document.querySelector(".green");
+        confirm.addEventListener("click", () => {
+          clearHighlight();
+          console.log(validCoordinates[0].coordinates);
+          placeCells(validCoordinates[0].coordinates, "placed");
+        });
       });
     });
   };
@@ -95,21 +122,43 @@ const dragnDrop = (function () {
         direction: "up",
       },
     ];
+
     validCoordinates = directions.filter(
       (value) => value.coordinates != undefined
     );
   };
 
-  const highlightCells = (coordinates) => {
+  const placeCells = (coordinates, chosenClass) => {
     for (let coordinate of coordinates) {
-      let cell = document.querySelector(
-        `.cell[data-location = '${coordinate[0]}${coordinate[1]}']`
-      );
-      cell.classList.add("highlight");
+      document
+        .querySelector(
+          `.cell[data-location = '${coordinate[0]}${coordinate[1]}']`
+        )
+        .classList.add(chosenClass);
     }
   };
 
-  return { enable };
+  const clearHighlight = () => {
+    cells.forEach((cell) => cell.classList.remove("highlight"));
+  };
+
+  const buttonMagic = () => {
+    let confirm = document.querySelector(".green");
+    confirm.addEventListener("click", () => {
+      dragnDrop.clearHighlight();
+      console.log(dragnDrop.validCoordinates[0].coordinates);
+      dragnDrop.placeCells(dragnDrop.validCoordinates[0].coordinates, "placed");
+    });
+  };
+
+  return {
+    enable,
+    clearHighlight,
+    placeCells,
+    get validCoordinates() {
+      return validCoordinates;
+    },
+  };
 })();
 
 function confirm(div) {

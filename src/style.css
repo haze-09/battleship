@@ -135,3 +135,7 @@ button {
 .red:hover {
   background-color: #e74848;
 }
+
+.placed{
+  background-color: #00abbe;
+}
