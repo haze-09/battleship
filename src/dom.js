@@ -42,7 +42,7 @@ function appendShips(ships) {
 const dragnDrop = (function () {
   let ships;
   let cells;
-  let validDirections;
+  let validCoordinates;
   let currentLength;
   let currentShip;
 
@@ -63,6 +63,10 @@ const dragnDrop = (function () {
       cell.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
+        let head = e.target.dataset.location;
+
+        directions(h);
+        highlightCells(validCoordinates[0].coordinates);
       });
 
       cell.addEventListener("drop", (e) => {
@@ -72,9 +76,38 @@ const dragnDrop = (function () {
     });
   };
 
-  function directions(head,length){
-    let coordinates = [{coordinate:21,direction:'right'}];
-  }
+  const directions = (head, length) => {
+    let directions = [
+      {
+        coordinates: coordinatesCalculator(head, length, "right"),
+        direction: "right",
+      },
+      {
+        coordinates: coordinatesCalculator(head, length, "down"),
+        direction: "down",
+      },
+      {
+        coordinates: coordinatesCalculator(head, length, "left"),
+        direction: "left",
+      },
+      {
+        coordinates: coordinatesCalculator(head, length, "up"),
+        direction: "up",
+      },
+    ];
+    validCoordinates = directions.filter(
+      (value) => value.coordinates != undefined
+    );
+  };
+
+  const highlightCells = (coordinates) => {
+    for (let coordinate of coordinates) {
+      let cell = document.querySelector(
+        `.cell[data-location = '${coordinate[0]}${coordinate[1]}']`
+      );
+      cell.classList.add("highlight");
+    }
+  };
 
   return { enable };
 })();
