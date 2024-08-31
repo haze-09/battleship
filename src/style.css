@@ -57,10 +57,10 @@ body {
   grid-template-rows: repeat(10, 1fr);
 }
 
-#left{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+#left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 div[data-location="00"] {
@@ -79,21 +79,59 @@ div[data-location="99"] {
   border-bottom-right-radius: 22px;
 }
 
-.ships{
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-    justify-content: space-between;
+.ships {
+  display: flex;
+  flex-direction: column;
+  gap: 5vh;
+  justify-content: space-between;
 }
-.ship{
-    padding: 10px;
-    transition: 0.2s;
-    border-radius: 10px;
+.ship {
+  padding: 10px;
+  font-size: 2rem;
+  text-align: center;
+  transition: 0.2s;
+  border-radius: 10px;
 }
-.ship:hover{
-    background-color: #00abbe;
+.ship:hover {
+  background-color: #00abbe;
 }
 
-.highlight{
+.highlight {
   background-color: #00abbe4d;
+}
+
+#confirm {
+  margin-top: 20px;
+  display: flex;
+  gap: 50px;
+}
+
+.invisible{
+  opacity: 0;
+}
+
+button {
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 18px;
+  background: none;
+  width: 6rem;
+}
+
+.green,
+.blue,
+.red {
+  transition: 0.2s;
+}
+.green:hover {
+  background-color: #60ca7f;
+}
+
+.blue:hover {
+  background-color: #00abbe4d;
+}
+
+.red:hover {
+  background-color: #e74848;
 }
