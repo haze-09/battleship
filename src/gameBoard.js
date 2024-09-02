@@ -10,6 +10,7 @@ function cell() {
 }
 
 function coordinatesCalculator(head, length, direction) {
+  console.log('coordinatesCalculator',head);
   let coordinates = [];
 
   switch (direction) {
@@ -68,13 +69,14 @@ function gameBoard() {
   let noOfShips = 5;
 
   const shipPlacer = (head, ship, direction) => {
+    console.log('shipPlacer',head);
     let coordinates = coordinatesCalculator(head, ship.length, direction);
 
     if (!coordinates) {
       throw new Error ("Invalid placement: Out of bounds.");
     }
     for (let coordinate of coordinates) {
-      if (board[coordinate[0]][coordinate[1]].ship) {
+      if (board[coordinate[0]][coordinate[1]].ship===true) {
         throw new Error ("Invalid placement: Overlapping ships.");
       }
     }
@@ -88,27 +90,28 @@ function gameBoard() {
   };
 
   const placeShip = (shipType, head, direction) => {
+    console.log('placeShip',head);
     if (noOfShips <= 0) {
       return "out of ships";
     }
     switch (shipType) {
-      case "carrier":
+      case "Carrier":
         shipPlacer(head, carrier, direction);
         break;
 
-      case "battleship":
+      case "Battleship":
         shipPlacer(head, battleship, direction);
         break;
 
-      case "cruiser":
+      case "Cruiser":
         shipPlacer(head, cruiser, direction);
         break;
 
-      case "submarine":
+      case "Submarine":
         shipPlacer(head, submarine, direction);
         break;
 
-      case "destroyer":
+      case "Destroyer":
         shipPlacer(head, destroyer, direction);
         break;
 
