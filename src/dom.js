@@ -165,10 +165,10 @@ const dragnDrop = (function () {
     );
 
     let rotateButton = document.querySelector(".blue");
-    rotateButton.addEventListener("click", rotate);
+    rotateButton.addEventListener("click", rotate,{ once: true });
 
     let cancelButton = document.querySelector(".red");
-    cancelButton.addEventListener("click", cancel);
+    cancelButton.addEventListener("click", cancel, { once: true });
   };
 
   const confirmPlacement = (board) => {
