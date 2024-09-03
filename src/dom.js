@@ -85,9 +85,11 @@ const dragnDrop = (function () {
   let noOfShips = 5;
   let head;
   let player1Setup = false;
+  let confirmClickHandler;
+  let rotateClickHandler;
+  let cancelClickHandler;
 
   const enable = (board) => {
-    console.log(board);
     ships = document.querySelectorAll(".ship");
     cells = document.querySelectorAll(".cell");
 
@@ -107,7 +109,6 @@ const dragnDrop = (function () {
   };
 
   const dragStart = (e) => {
-    console.log("Drag started");
     e.dataTransfer.setData("name", e.target.id);
     currentShip = e.target;
     currentLength = currentShip.dataset.length;
@@ -134,7 +135,6 @@ const dragnDrop = (function () {
     e.dataTransfer.dropEffect = "move";
 
     head = e.target.dataset.location.split("").map(Number);
-    console.log("dragOver", head);
     let length = parseInt(currentLength);
     directions(length);
     if (validCoordinates && validCoordinates.length > 0) {
@@ -144,34 +144,50 @@ const dragnDrop = (function () {
 
   const drop = (e, board) => {
     e.preventDefault();
-    console.log("drop", head);
-    console.log(board);
+    console.log(head);
+    console.log(validCoordinates);
     ships.forEach((ship) => ship.setAttribute("draggable", "false"));
     enableButtons(board);
   };
 
   const enableButtons = (board) => {
-    console.log(board);
     let buttonDiv = document.querySelector("#confirm");
     buttonDiv.classList.remove("invisible");
 
     let confirmButton = document.querySelector(".green");
-    confirmButton.addEventListener(
-      "click",
-      () => {
-        confirmPlacement(board);
-      },
-      { once: true }
-    );
-
     let rotateButton = document.querySelector(".blue");
-    rotateButton.addEventListener("click", rotate);
-
     let cancelButton = document.querySelector(".red");
-    cancelButton.addEventListener("click", cancel);
+
+    confirmClickHandler = () => {
+      confirmPlacement(board);
+    };
+
+    rotateClickHandler = () => {
+      rotate();
+    };
+
+    cancelClickHandler = () => {
+      cancel();
+    };
+
+    confirmButton.addEventListener("click", confirmClickHandler, {
+      once: true,
+    });
+    rotateButton.addEventListener("click", rotateClickHandler);
+    cancelButton.addEventListener("click", cancelClickHandler);
   };
 
   const confirmPlacement = (board) => {
+    noOfShips--;
+    clearHighlight();
+    placeCells(currentDirection.coordinates, "placed");
+    let buttonDiv = document.querySelector("#confirm");
+    buttonDiv.classList.add("invisible");
+    board.placeShip(currentShip.id, head, currentDirection.direction);
+    currentShip.remove();
+    ships.forEach((ship) => ship.setAttribute("draggable", "true"));
+    removeListeners();
+
     if (noOfShips <= 0) {
       if (player1Setup === false) {
         noOfShips = 5;
@@ -180,18 +196,6 @@ const dragnDrop = (function () {
       } else {
         gameStart();
       }
-    } else {
-      noOfShips--;
-      clearHighlight();
-      placeCells(currentDirection.coordinates, "placed");
-      console.log("confirmPlacement", head);
-      console.log(board);
-      board.placeShip(currentShip.id, head, currentDirection.direction);
-      currentShip.remove();
-      ships.forEach((ship) => ship.setAttribute("draggable", "true"));
-
-      // let confirmButton = document.querySelector(".green");
-      // confirmButton.setAttribute("disabled", true);
     }
   };
 
@@ -209,7 +213,23 @@ const dragnDrop = (function () {
   };
 
   const cancel = () => {
-    console.log("meow");
+    clearHighlight();
+    let buttonDiv = document.querySelector("#confirm");
+    buttonDiv.classList.add("invisible");
+    ships.forEach((ship) => ship.setAttribute("draggable", "true"));
+    removeListeners();
+  };
+
+  const removeListeners = () => {
+    document
+      .querySelector(".green")
+      .removeEventListener("click", confirmClickHandler);
+    document
+      .querySelector(".blue")
+      .removeEventListener("click", rotateClickHandler);
+    document
+      .querySelector(".red")
+      .removeEventListener("click", cancelClickHandler);
   };
 
   const directions = (length) => {
@@ -288,6 +308,7 @@ function boardBuilder(player, board) {
   right.innerHTML = "";
 
   let playerName = document.createElement("p");
+  playerName.classList.add('playerName');
   playerName.textContent = player;
   left.appendChild(playerName);
 
@@ -312,7 +333,6 @@ function boardBuilder(player, board) {
   buttonDiv.id = "confirm";
   confirm(buttonDiv);
   left.appendChild(buttonDiv);
-  console.log(board);
   dragnDrop.enable(board);
 }
 

@@ -139,3 +139,7 @@ button {
 .placed{
   background-color: #00abbe;
 }
+
+.playerName{
+  margin-bottom: 20px;
+}

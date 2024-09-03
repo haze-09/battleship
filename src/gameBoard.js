@@ -10,12 +10,11 @@ function cell() {
 }
 
 function coordinatesCalculator(head, length, direction) {
-  console.log('coordinatesCalculator',head);
   let coordinates = [];
 
   switch (direction) {
     case "left":
-      if (head[1] - length >= 0) {
+      if (head[1] - length + 1 >= 0) {
         for (let i = 0; i < length; i++) {
           coordinates.push([head[0], head[1] - i]);
         }
@@ -23,7 +22,7 @@ function coordinatesCalculator(head, length, direction) {
       break;
 
     case "right":
-      if (head[1] + length <= 9) {
+      if (head[1] + length - 1 <= 9) {
         for (let i = 0; i < length; i++) {
           coordinates.push([head[0], head[1] + i]);
         }
@@ -31,7 +30,7 @@ function coordinatesCalculator(head, length, direction) {
       break;
 
     case "up":
-      if (head[0] - length >= 0) {
+      if (head[0] - length + 1 >= 0) {
         for (let i = 0; i < length; i++) {
           coordinates.push([head[0] - i, head[1]]);
         }
@@ -39,7 +38,7 @@ function coordinatesCalculator(head, length, direction) {
       break;
 
     case "down":
-      if (head[0] + length <= 9) {
+      if (head[0] + length - 1 <= 9) {
         for (let i = 0; i < length; i++) {
           coordinates.push([head[0] + i, head[1]]);
         }
@@ -69,15 +68,15 @@ function gameBoard() {
   let noOfShips = 5;
 
   const shipPlacer = (head, ship, direction) => {
-    console.log('shipPlacer',head);
+    console.log("shipPlacer", head);
     let coordinates = coordinatesCalculator(head, ship.length, direction);
 
     if (!coordinates) {
-      throw new Error ("Invalid placement: Out of bounds.");
+      throw new Error("Invalid placement: Out of bounds.");
     }
     for (let coordinate of coordinates) {
-      if (board[coordinate[0]][coordinate[1]].ship===true) {
-        throw new Error ("Invalid placement: Overlapping ships.");
+      if (board[coordinate[0]][coordinate[1]].ship === true) {
+        throw new Error("Invalid placement: Overlapping ships.");
       }
     }
 
@@ -90,7 +89,7 @@ function gameBoard() {
   };
 
   const placeShip = (shipType, head, direction) => {
-    console.log('placeShip',head);
+    console.log("placeShip", head);
     if (noOfShips <= 0) {
       return "out of ships";
     }
@@ -116,7 +115,7 @@ function gameBoard() {
         break;
 
       default:
-        throw new Error ("invalid ship name");
+        throw new Error("invalid ship name");
     }
   };
 
@@ -152,4 +151,4 @@ function gameBoard() {
   };
 }
 
-export {gameBoard,coordinatesCalculator};
+export { gameBoard, coordinatesCalculator };
