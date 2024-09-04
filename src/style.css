@@ -45,6 +45,14 @@ body {
 
 .cell {
   border: 1px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.1s;
+}
+
+.cell:hover{
+  border: 3px solid;
 }
 
 .grid {
@@ -142,4 +150,23 @@ button {
 
 .playerName{
   margin-bottom: 20px;
+}
+
+.playerNameBottom{
+  margin-top: 20px;
+  text-align: center;
+}
+
+.miss{
+
+}
+
+.hit{
+  color: #ff0000;
+}
+
+.winner{
+  margin-top: 30px;
+  font-size: larger;
+  text-align: center;
 }

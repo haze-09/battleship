@@ -79,6 +79,7 @@ const dragnDrop = (function () {
   let ships;
   let cells;
   let validCoordinates;
+  let placedCoordinates = [];
   let currentDirection;
   let currentLength;
   let currentShip;
@@ -144,8 +145,6 @@ const dragnDrop = (function () {
 
   const drop = (e, board) => {
     e.preventDefault();
-    console.log(head);
-    console.log(validCoordinates);
     ships.forEach((ship) => ship.setAttribute("draggable", "false"));
     enableButtons(board);
   };
@@ -183,6 +182,7 @@ const dragnDrop = (function () {
     placeCells(currentDirection.coordinates, "placed");
     let buttonDiv = document.querySelector("#confirm");
     buttonDiv.classList.add("invisible");
+    placedCoordinates.push(...currentDirection.coordinates);
     board.placeShip(currentShip.id, head, currentDirection.direction);
     currentShip.remove();
     ships.forEach((ship) => ship.setAttribute("draggable", "true"));
@@ -192,6 +192,7 @@ const dragnDrop = (function () {
       if (player1Setup === false) {
         noOfShips = 5;
         player1Setup = true;
+        placedCoordinates = [];
         boardBuilder("Player 2", player2.board);
       } else {
         gameStart();
@@ -252,8 +253,17 @@ const dragnDrop = (function () {
       },
     ];
 
+    const hasOverlap = (coords) => {
+      return coords.some((coord) =>
+        placedCoordinates.some(
+          (placed) => placed[0] === coord[0] && placed[1] === coord[1]
+        )
+      );
+    };
+
     validCoordinates = directions.filter(
-      (value) => value.coordinates != undefined
+      (value) =>
+        value.coordinates != undefined && !hasOverlap(value.coordinates)
     );
 
     currentDirection = validCoordinates[0];
@@ -308,7 +318,7 @@ function boardBuilder(player, board) {
   right.innerHTML = "";
 
   let playerName = document.createElement("p");
-  playerName.classList.add('playerName');
+  playerName.classList.add("playerName");
   playerName.textContent = player;
   left.appendChild(playerName);
 
@@ -336,4 +346,89 @@ function boardBuilder(player, board) {
   dragnDrop.enable(board);
 }
 
-export { homePage, boardBuilder };
+function playArea(
+  player1Board,
+  player2Board,
+  currentPlayer = "Player 1",
+  opponent = "Player 2"
+) {
+  left.innerHTML = "";
+  right.innerHTML = "";
+
+  let yourBoardDiv = document.createElement("div");
+  left.appendChild(yourBoardDiv);
+
+  let currentPlayerName = document.createElement("p");
+  currentPlayerName.textContent = currentPlayer;
+  currentPlayerName.classList.add('playerNameBottom')
+  left.appendChild(currentPlayerName);
+
+  for (let [rowIndex, row] of player1Board.board.entries()) {
+    for (let [colIndex, item] of row.entries()) {
+      let cell = document.createElement("div");
+      cell.dataset.location = `${rowIndex}${colIndex}`;
+      cell.classList.add("cell");
+      if (item.missed === true) {
+        cell.textContent = "o";
+      }
+      if (item.ship === true) {
+        cell.classList.add("placed");
+      }
+      if (item.hit === true) {
+        cell.textContent = "X";
+        cell.classList.add("hit");
+      }
+      yourBoardDiv.classList.add("grid");
+      yourBoardDiv.appendChild(cell);
+    }
+  }
+
+  let opponentBoardDiv = document.createElement("div");
+  right.appendChild(opponentBoardDiv);
+
+  let opponentName = document.createElement("p");
+  opponentName.textContent = opponent;
+  opponentName.classList.add('playerNameBottom')
+  right.appendChild(opponentName);
+
+  for (let [rowIndex, row] of player2Board.board.entries()) {
+    for (let [colIndex, item] of row.entries()) {
+      let cell = document.createElement("div");
+      cell.dataset.location = `${rowIndex}${colIndex}`;
+      cell.classList.add("cell");
+      if (item.missed === true) {
+        cell.textContent = "o";
+      }
+      if (item.hit === true) {
+        cell.textContent = "X";
+        cell.classList.add("hit");
+      }
+
+      cell.addEventListener("click", (e) => {
+        let coordinate = e.target.dataset.location.split("").map(Number);
+        player2Board.receiveAttack(coordinate);
+        console.log(player2Board.lose());
+        if (player2Board.lose() === true) {
+          left.innerHTML = "";
+          right.innerHTML = "";
+
+          let winMessage = `${currentPlayer} has won!`;
+          let winner = document.createElement('p');
+          winner.textContent = winMessage;
+          winner.classList.add('winner')
+
+          let title = document.querySelector("#title");
+
+          title.after(winner);
+        } else {
+          playArea(player2Board, player1Board, opponent, currentPlayer);
+        }
+      });
+
+      opponentBoardDiv.classList.add("grid");
+      opponentBoardDiv.appendChild(cell);
+    }
+  }
+}
+
+export { homePage, boardBuilder, playArea };

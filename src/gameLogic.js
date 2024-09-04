@@ -1,5 +1,5 @@
-import {player1,computer} from "./player.js";
-import { boardBuilder } from "./dom.js";
+import {player1,player2,computer} from "./player.js";
+import { boardBuilder, playArea } from "./dom.js";
 
 
 
@@ -7,9 +7,7 @@ import { boardBuilder } from "./dom.js";
 function boardSetup(type){
     switch (type) {
         case 'pvp':
-            boardBuilder('Player 1',player1.board);
-
-            
+            boardBuilder('Player 1',player1.board);            
             break;
     
         default:
@@ -19,7 +17,7 @@ function boardSetup(type){
 }
 
 function gameStart(){
-    console.log('meow');
+    playArea(player1.board,player2.board);
 
 }
 
