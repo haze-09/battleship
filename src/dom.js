@@ -1,8 +1,8 @@
 import PvP from "./assets/pvp.png";
 import PvC from "./assets/pvc.png";
-import { player2 } from "./player.js";
+import { player2, getRandomCoordinate } from "./player.js";
 import { coordinatesCalculator } from "./gameBoard.js";
-import { boardSetup, gameStart } from "./gameLogic.js";
+import { boardSetup, gameStart, gameStartPvc } from "./gameLogic.js";
 
 let left = document.querySelector("#left");
 let right = document.querySelector("#right");
@@ -90,7 +90,7 @@ const dragnDrop = (function () {
   let rotateClickHandler;
   let cancelClickHandler;
 
-  const enable = (board) => {
+  const enable = (board, type) => {
     ships = document.querySelectorAll(".ship");
     cells = document.querySelectorAll(".cell");
 
@@ -104,7 +104,7 @@ const dragnDrop = (function () {
       cell.addEventListener("dragenter", dragEnter);
       cell.addEventListener("dragover", dragOver);
       cell.addEventListener("drop", (e) => {
-        drop(e, board);
+        drop(e, board, type);
       });
     });
   };
@@ -143,13 +143,13 @@ const dragnDrop = (function () {
     }
   };
 
-  const drop = (e, board) => {
+  const drop = (e, board, type) => {
     e.preventDefault();
     ships.forEach((ship) => ship.setAttribute("draggable", "false"));
-    enableButtons(board);
+    enableButtons(board,type);
   };
 
-  const enableButtons = (board) => {
+  const enableButtons = (board, type) => {
     let buttonDiv = document.querySelector("#confirm");
     buttonDiv.classList.remove("invisible");
 
@@ -158,7 +158,7 @@ const dragnDrop = (function () {
     let cancelButton = document.querySelector(".red");
 
     confirmClickHandler = () => {
-      confirmPlacement(board);
+      confirmPlacement(board, type);
     };
 
     rotateClickHandler = () => {
@@ -176,7 +176,7 @@ const dragnDrop = (function () {
     cancelButton.addEventListener("click", cancelClickHandler);
   };
 
-  const confirmPlacement = (board) => {
+  const confirmPlacement = (board, type) => {
     noOfShips--;
     clearHighlight();
     placeCells(currentDirection.coordinates, "placed");
@@ -189,13 +189,17 @@ const dragnDrop = (function () {
     removeListeners();
 
     if (noOfShips <= 0) {
-      if (player1Setup === false) {
-        noOfShips = 5;
-        player1Setup = true;
-        placedCoordinates = [];
-        boardBuilder("Player 2", player2.board);
+      if (type === "pvc") {
+        gameStartPvc();
       } else {
-        gameStart();
+        if (player1Setup === false) {
+          noOfShips = 5;
+          player1Setup = true;
+          placedCoordinates = [];
+          boardBuilder("Player 2", player2.board);
+        } else {
+          gameStart();
+        }
       }
     }
   };
@@ -311,7 +315,7 @@ function confirm(div) {
   div.appendChild(cancelButton);
 }
 
-function boardBuilder(player, board) {
+function boardBuilder(player, board, type) {
   left.classList.remove("border");
   right.classList.remove("border");
   left.innerHTML = "";
@@ -343,7 +347,7 @@ function boardBuilder(player, board) {
   buttonDiv.id = "confirm";
   confirm(buttonDiv);
   left.appendChild(buttonDiv);
-  dragnDrop.enable(board);
+  dragnDrop.enable(board, type);
 }
 
 function playArea(
@@ -360,7 +364,7 @@ function playArea(
 
   let currentPlayerName = document.createElement("p");
   currentPlayerName.textContent = currentPlayer;
-  currentPlayerName.classList.add('playerNameBottom')
+  currentPlayerName.classList.add("playerNameBottom");
   left.appendChild(currentPlayerName);
 
   for (let [rowIndex, row] of player1Board.board.entries()) {
@@ -388,7 +392,7 @@ function playArea(
 
   let opponentName = document.createElement("p");
   opponentName.textContent = opponent;
-  opponentName.classList.add('playerNameBottom')
+  opponentName.classList.add("playerNameBottom");
   right.appendChild(opponentName);
 
   for (let [rowIndex, row] of player2Board.board.entries()) {
@@ -413,9 +417,9 @@ function playArea(
           right.innerHTML = "";
 
           let winMessage = `${currentPlayer} has won!`;
-          let winner = document.createElement('p');
+          let winner = document.createElement("p");
           winner.textContent = winMessage;
-          winner.classList.add('winner')
+          winner.classList.add("winner");
 
           let title = document.querySelector("#title");
 
@@ -431,4 +435,93 @@ function playArea(
   }
 }
 
-export { homePage, boardBuilder, playArea };
+function playAreaPvc(player1Board, computerBoard) {
+  left.innerHTML = "";
+  right.innerHTML = "";
+
+  let yourBoardDiv = document.createElement("div");
+  left.appendChild(yourBoardDiv);
+
+  let playerName = document.createElement("p");
+  playerName.textContent = "Player";
+  playerName.classList.add("playerNameBottom");
+  left.appendChild(playerName);
+
+  for (let [rowIndex, row] of player1Board.board.entries()) {
+    for (let [colIndex, item] of row.entries()) {
+      let cell = document.createElement("div");
+      cell.dataset.location = `${rowIndex}${colIndex}`;
+      cell.classList.add("cell");
+      if (item.missed === true) {
+        cell.textContent = "o";
+      }
+      if (item.ship === true) {
+        cell.classList.add("placed");
+      }
+      if (item.hit === true) {
+        cell.textContent = "X";
+        cell.classList.add("hit");
+      }
+      yourBoardDiv.classList.add("grid");
+      yourBoardDiv.appendChild(cell);
+    }
+  }
+
+  let computerBoardDiv = document.createElement("div");
+  right.appendChild(computerBoardDiv);
+
+  let computerName = document.createElement("p");
+  computerName.textContent = "Computer";
+  computerName.classList.add("playerNameBottom");
+  right.appendChild(computerName);
+
+  for (let [rowIndex, row] of computerBoard.board.entries()) {
+    for (let [colIndex, item] of row.entries()) {
+      let cell = document.createElement("div");
+      cell.dataset.location = `${rowIndex}${colIndex}`;
+      cell.classList.add("cell");
+      if (item.missed === true) {
+        cell.textContent = "o";
+      }
+      if (item.hit === true) {
+        cell.textContent = "X";
+        cell.classList.add("hit");
+      }
+
+      cell.addEventListener("click", (e) => {
+        let coordinate = e.target.dataset.location.split("").map(Number);
+        computerBoard.receiveAttack(coordinate);
+        console.log(computerBoard.lose());
+        if (computerBoard.lose() === true) {
+          winner("Player");
+        } else {
+          player1Board.receiveAttack(getRandomCoordinate());
+          if (player1Board.lose() === true) {
+            winner("Computer");
+          } else {
+            playAreaPvc(player1Board, computerBoard);
+          }
+        }
+      });
+
+      computerBoardDiv.classList.add("grid");
+      computerBoardDiv.appendChild(cell);
+    }
+  }
+}
+
+const winner = (player) => {
+  left.innerHTML = "";
+  right.innerHTML = "";
+
+  let winMessage = `${player} has won!`;
+  let winner = document.createElement("p");
+  winner.textContent = winMessage;
+  winner.classList.add("winner");
+
+  let title = document.querySelector("#title");
+
+  title.after(winner);
+};
+
+export { homePage, boardBuilder, playArea, playAreaPvc };
